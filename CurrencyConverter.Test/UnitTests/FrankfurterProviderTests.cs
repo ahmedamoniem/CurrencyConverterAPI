@@ -83,4 +83,64 @@ public class FrankfurterProviderTests
         Assert.NotNull(result.HistoricalRates);
         Assert.Equal(2, result.HistoricalRates!.Count);
     }
+
+    [Fact]
+    public async Task GetRatesAsync_ThrowsException_WhenResponseIsNull()
+    {
+        // Arrange
+        HttpClient client = CreateMockHttpClient<FrankfurterApiResponse>(null!); // Simulate null response
+
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient("FrankfurterClient")).Returns(client);
+
+        var provider = new FrankfurterProvider(factory.Object, _mockLogger.Object);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentNullException>(() => provider.GetRatesAsync("EUR"));
+    }
+
+    [Fact]
+    public async Task GetRatesAsync_ThrowsException_OnHttpError()
+    {
+        // Arrange
+        var handler = new Mock<HttpMessageHandler>();
+
+        handler.Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                Content = new StringContent("Internal Server Error")
+            });
+
+        var client = new HttpClient(handler.Object)
+        {
+            BaseAddress = new Uri("https://api.frankfurter.app/")
+        };
+
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient("FrankfurterClient")).Returns(client);
+
+        var provider = new FrankfurterProvider(factory.Object, _mockLogger.Object);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<HttpRequestException>(() => provider.GetRatesAsync("EUR"));
+    }
+
+    [Fact]
+    public async Task GetRatesAsync_ThrowsException_WhenBaseCurrencyIsEmpty()
+    {
+        // Arrange
+        var factory = new Mock<IHttpClientFactory>();
+        var client = CreateMockHttpClient(new FrankfurterApiResponse("EUR", "2024-04-01", []));
+        factory.Setup(f => f.CreateClient("FrankfurterClient")).Returns(client);
+
+        var provider = new FrankfurterProvider(factory.Object, _mockLogger.Object);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => provider.GetRatesAsync(""));
+    }
+
 }

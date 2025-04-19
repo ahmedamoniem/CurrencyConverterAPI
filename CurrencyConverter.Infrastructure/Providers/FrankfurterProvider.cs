@@ -7,7 +7,9 @@ using CurrencyConverter.Infrastructure.Providers.Models;
 
 namespace CurrencyConverter.Infrastructure.Providers;
 
-public class FrankfurterProvider(IHttpClientFactory httpClientFactory, ILogger<FrankfurterProvider> logger) : ICurrencyProvider
+public class
+   FrankfurterProvider(IHttpClientFactory httpClientFactory,
+    ILogger<FrankfurterProvider> logger) : ICurrencyProvider
 {
 
     private readonly HttpClient _httpClient = httpClientFactory.CreateClient("FrankfurterClient");
