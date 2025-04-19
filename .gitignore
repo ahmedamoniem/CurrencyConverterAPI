@@ -398,3 +398,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+/CurrencyConverter.API/appsettings.Development.json
+/CurrencyConverter.API/appsettings.json
