@@ -21,4 +21,8 @@
     <ProjectReference Include="..\CurrencyConverter.ServiceDefaults\CurrencyConverter.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Middleware\" />
+  </ItemGroup>
+
 </Project>
