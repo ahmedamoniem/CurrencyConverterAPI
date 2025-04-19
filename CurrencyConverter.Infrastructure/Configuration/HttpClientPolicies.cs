@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
@@ -8,16 +9,28 @@ namespace CurrencyConverter.Infrastructure.Configuration;
 
 public static class HttpClientPolicies
 {
-    public static void AddHttpClientPolicies(this IServiceCollection services)
+
+    public static void AddHttpClientPolicies(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHttpClient("FrankfurterClient", client =>
+        var clientConfig = configuration.GetSection("ApiClients").Get<Dictionary<string, string>>();
+        ArgumentNullException.ThrowIfNull(clientConfig);
+
+        services.Configure<ApiClientOptions>(configuration.GetSection("ApiClients"));
+
+        var sp = services.BuildServiceProvider();
+        var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("PollyLogger");
+
+        foreach (var (clientName, baseUrl) in clientConfig)
         {
-            client.BaseAddress = new Uri("https://api.frankfurter.app/");
-            client.Timeout = Timeout.InfiniteTimeSpan; // Delegate timeout to Polly
-        })
-        .AddPolicyHandler((sp, _) => GetTimeoutPolicy(sp.GetRequiredService<ILoggerFactory>().CreateLogger("PollyLogger")))
-        .AddPolicyHandler((sp, _) => GetRetryPolicy(sp.GetRequiredService<ILoggerFactory>().CreateLogger("PollyLogger")))
-        .AddPolicyHandler((sp, _) => GetCircuitBreakerPolicy(sp.GetRequiredService<ILoggerFactory>().CreateLogger("PollyLogger")));
+            services.AddHttpClient(clientName, client =>
+            {
+                client.BaseAddress = new Uri(baseUrl);
+                client.Timeout = Timeout.InfiniteTimeSpan;
+            })
+                .AddPolicyHandler((sp, _) => GetTimeoutPolicy(sp.GetRequiredService<ILoggerFactory>().CreateLogger(clientName)))
+                .AddPolicyHandler((sp, _) => GetRetryPolicy(sp.GetRequiredService<ILoggerFactory>().CreateLogger(clientName)))
+                .AddPolicyHandler((sp, _) => GetCircuitBreakerPolicy(sp.GetRequiredService<ILoggerFactory>().CreateLogger(clientName)));
+        }
     }
 
     private static IAsyncPolicy<HttpResponseMessage> GetTimeoutPolicy(ILogger logger)

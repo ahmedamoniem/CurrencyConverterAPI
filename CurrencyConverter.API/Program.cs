@@ -9,7 +9,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();
-builder.Services.AddHttpClientPolicies();
+builder.Services.AddHttpClientPolicies(builder.Configuration);
 
 var app = builder.Build();
 
