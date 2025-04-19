@@ -1,23 +1,33 @@
 ﻿using CurrencyConverter.Application.DTOs;
 using CurrencyConverter.Application.Interfaces;
-using System.Net.Http.Json;
-using Microsoft.Extensions.Logging;
-using Throw;
 using CurrencyConverter.Infrastructure.Providers.Models;
+using Microsoft.Extensions.Logging;
+using System.Net.Http.Json;
+using Throw;
 
 namespace CurrencyConverter.Infrastructure.Providers;
 
-public class
-   FrankfurterProvider(IHttpClientFactory httpClientFactory,
-    ILogger<FrankfurterProvider> logger) : ICurrencyProvider
+public class FrankfurterProvider(
+    IHttpClientFactory httpClientFactory,
+    ILogger<FrankfurterProvider> logger,
+    ICacheService cacheService) : ICurrencyProvider
 {
-
     private readonly HttpClient _httpClient = httpClientFactory.CreateClient("FrankfurterClient");
     private readonly ILogger<FrankfurterProvider> _logger = logger;
+    private readonly ICacheService _cache = cacheService;
 
     public async Task<ExchangeRateDto> GetRatesAsync(string baseCurrency)
     {
         baseCurrency.Throw("Base currency is required.").IfNullOrWhiteSpace(_ => _);
+        var cacheKey = $"rates:latest:{baseCurrency.ToUpperInvariant()}";
+
+        var cached = await _cache.GetAsync<ExchangeRateDto>(cacheKey);
+        if (cached is not null)
+        {
+            _logger.LogInformation("Returning cached latest rates for {BaseCurrency}", baseCurrency);
+            return cached;
+        }
+
         var url = $"latest?base={baseCurrency.ToUpperInvariant()}";
 
         try
@@ -32,11 +42,14 @@ public class
                 parsedDate = DateTime.UtcNow;
             }
 
-            return new ExchangeRateDto(
+            var result = new ExchangeRateDto(
                 response.Base,
                 parsedDate,
                 response.Rates
             );
+
+            await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(30));
+            return result;
         }
         catch (HttpRequestException ex)
         {
@@ -53,6 +66,15 @@ public class
     public async Task<ExchangeRateDto> GetHistoricalRatesAsync(string baseCurrency, DateTime startDate, DateTime endDate)
     {
         baseCurrency.Throw("Base currency is required.").IfNullOrWhiteSpace(_ => _);
+        var cacheKey = $"rates:historical:{baseCurrency}:{startDate:yyyyMMdd}:{endDate:yyyyMMdd}";
+
+        var cached = await _cache.GetAsync<ExchangeRateDto>(cacheKey);
+        if (cached is not null)
+        {
+            _logger.LogInformation("Returning cached historical rates for {BaseCurrency} from {Start} to {End}", baseCurrency, startDate, endDate);
+            return cached;
+        }
+
         var url = $"{startDate:yyyy-MM-dd}..{endDate:yyyy-MM-dd}?base={baseCurrency.ToUpperInvariant()}";
 
         try
@@ -66,12 +88,15 @@ public class
                 kvp => kvp.Value
             );
 
-            return new ExchangeRateDto(
+            var result = new ExchangeRateDto(
                 response.Base,
                 DateTime.MinValue,
                 [],
                 rates
             );
+
+            await _cache.SetAsync(cacheKey, result, TimeSpan.FromHours(6));
+            return result;
         }
         catch (HttpRequestException ex)
         {
