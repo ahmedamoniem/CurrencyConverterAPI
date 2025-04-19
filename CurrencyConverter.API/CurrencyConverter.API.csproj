@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CurrencyConverter.Infrastructure\CurrencyConverter.Infrastructure.csproj" />
     <ProjectReference Include="..\CurrencyConverter.ServiceDefaults\CurrencyConverter.ServiceDefaults.csproj" />
   </ItemGroup>
 
