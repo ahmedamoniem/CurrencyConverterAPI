@@ -5,6 +5,7 @@ using CurrencyConverter.Infrastructure.Caching;
 using CurrencyConverter.Application.Interfaces;
 using Serilog;
 using Serilog.Events;
+using CurrencyConverter.Api.Middlewares;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +45,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
+app.UseMiddleware<JwtTokenValidationMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseFastEndpoints();
