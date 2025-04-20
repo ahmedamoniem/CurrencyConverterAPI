@@ -8,6 +8,7 @@ using Serilog.Events;
 using CurrencyConverter.Api.Middlewares;
 using CurrencyConverter.Application.Factories;
 using CurrencyConverter.Infrastructure.Providers;
+using CurrencyConverter.Api.Middleware;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +49,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 app.UseSerilogRequestLogging();
+app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseMiddleware<RateLimitingMiddleware>();
 app.UseMiddleware<JwtTokenValidationMiddleware>();
