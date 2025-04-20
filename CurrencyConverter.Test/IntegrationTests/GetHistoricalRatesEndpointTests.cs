@@ -6,24 +6,31 @@ using System.Text;
 using System.Text.Json;
 using CurrencyConverter.Application.DTOs;
 using CurrencyConverter.Test.Helpers;
-using FastEndpoints;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CurrencyConverter.Test.IntegrationTests;
 
-public class GetLatestRatesEndpointTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class GetHistoricalRatesEndpointTests : IClassFixture<WebApplicationFactory<Program>>
 {
-    private readonly HttpClient _client = factory.CreateClient();
+    private readonly HttpClient _client;
+
+    public GetHistoricalRatesEndpointTests(WebApplicationFactory<Program> factory)
+    {
+        _client = factory.CreateClient();
+    }
 
     [Fact]
-    public async Task ReturnsLatestRates_WhenAuthorized()
+    public async Task ReturnsHistoricalRates_WhenAuthorized()
     {
-        var token = JwtGenerator.GenerateJwtToken("admin");
+        // Arrange
+        var token = JwtGenerator.GenerateJwtToken("viewer");
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var response = await _client.GetAsync("/api/rates/latest/v1?BaseCurrency=USD");
+        var query = "?BaseCurrency=USD&StartDate=2024-03-01&EndDate=2024-03-05";
+        var response = await _client.GetAsync("/api/rates/historical" + query);
 
+        // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();
@@ -31,12 +38,15 @@ public class GetLatestRatesEndpointTests(WebApplicationFactory<Program> factory)
 
         Assert.NotNull(dto);
         Assert.Equal("USD", dto.Base);
+        Assert.NotNull(dto.HistoricalRates);
+        Assert.True(dto.HistoricalRates!.Count > 0);
     }
 
     [Fact]
-    public async Task ReturnsUnauthorized_WhenTokenMissing()
+    public async Task ReturnsUnauthorized_WhenNoToken()
     {
-        var response = await _client.GetAsync("/api/v1/rates/latest?BaseCurrency=USD");
+        var query = "?BaseCurrency=USD&StartDate=2024-03-01&EndDate=2024-03-05";
+        var response = await _client.GetAsync("/api/rates/historical" + query);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }

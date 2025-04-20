@@ -8,5 +8,5 @@ public interface ICurrencyService
 
     Task<ConversionResponseDto> ConvertCurrencyAsync(ConversionRequestDto request);
 
-    Task<PaginatedResult<ExchangeRateDto>> GetHistoricalRatesAsync(HistoricalRatesRequestDto request, int page = 1, int pageSize = 50);
+    Task<PaginatedResult<ExchangeRateDto>> GetHistoricalRatesAsync(HistoricalRatesRequestDto request);
 }

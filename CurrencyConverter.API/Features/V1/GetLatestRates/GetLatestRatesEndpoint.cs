@@ -1,13 +1,11 @@
 ﻿using CurrencyConverter.Application.DTOs;
 using CurrencyConverter.Application.Interfaces;
 using FastEndpoints;
-using Microsoft.AspNetCore.Authorization;
 
 namespace CurrencyConverter.API.Features.V1.GetLatestRates;
 
-
-[Authorize(Roles = "viewer,admin")]
-public class GetLatestRatesEndpoint(ICurrencyService currencyService) : Endpoint<GetLatestRatesRequest, ExchangeRateDto>
+public class GetLatestRatesEndpoint(ICurrencyService currencyService) 
+    : Endpoint<GetLatestRatesRequest, ExchangeRateDto>
 {
     private readonly ICurrencyService _currencyService = currencyService;
 
@@ -15,7 +13,16 @@ public class GetLatestRatesEndpoint(ICurrencyService currencyService) : Endpoint
     {
         Verbs(Http.GET);
         Routes("/api/rates/latest");
+        Roles("viewer", "admin");
         Version(1);
+        Summary(s =>
+        {
+            s.Summary = "Get the latest exchange rates";
+            s.Description = "Returns the most recent exchange rates for the specified base currency.";
+            s.Response<ExchangeRateDto>(200, "Successfully retrieved exchange rates.");
+            s.Response(401, "Unauthorized - missing or invalid JWT token.");
+            s.Response(403, "Forbidden - user lacks required role.");
+        });
     }
 
     public override async Task HandleAsync(GetLatestRatesRequest req, CancellationToken ct)
