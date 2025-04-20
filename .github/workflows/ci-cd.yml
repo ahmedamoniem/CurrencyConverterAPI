@@ -47,5 +47,5 @@ jobs:
 
       - name: 📦 Build and push Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/currencyconverter-api:latest -f CurrencyConverter.Api/Dockerfile .
+          docker build -t ghcr.io/${{ github.repository }}/currencyconverter-api:latest -f CurrencyConverter.API/Dockerfile .
           docker push ghcr.io/${{ github.repository }}/currencyconverter-api:latest
