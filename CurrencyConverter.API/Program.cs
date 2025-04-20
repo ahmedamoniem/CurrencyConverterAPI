@@ -3,6 +3,8 @@ using FastEndpoints.Swagger;
 using CurrencyConverter.Infrastructure.Configuration;
 using CurrencyConverter.Infrastructure.Caching;
 using CurrencyConverter.Application.Interfaces;
+using Serilog;
+using Serilog.Events;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +21,18 @@ builder.Services.AddStackExchangeRedisCache(options =>
 });
 
 builder.Services.AddSingleton<ICacheService, RedisService>();
+builder.Host.UseSerilog((ctx, services, loggerConfig) =>
+{
+    loggerConfig
+        .ReadFrom.Configuration(ctx.Configuration)
+        .Enrich.FromLogContext()
+        .Enrich.WithProperty("Application", "CurrencyConverter.Api")
+        .WriteTo.Console()
+        .WriteTo.Seq(builder.Configuration["ConnectionStrings:Seq"] ?? "http://localhost:5341",
+                     apiKey: builder.Configuration["Seq:ApiKey"],
+                     restrictedToMinimumLevel: LogEventLevel.Information);
+});
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
@@ -28,7 +42,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
+app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
