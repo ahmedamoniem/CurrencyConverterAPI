@@ -1,25 +1,32 @@
 ﻿using CurrencyConverter.Application.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using System.Text;
 using System.Text.Json;
 
 namespace CurrencyConverter.Infrastructure.Caching;
 
-public class RedisService(IDistributedCache cache, ILogger<RedisService> logger)
-    : ICacheService
+public class RedisService : ICacheService
 {
-    private readonly IDistributedCache _cache = cache;
-    private readonly ILogger<RedisService> _logger = logger;
+    private readonly IDistributedCache _cache;
+    private readonly ILogger<RedisService> _logger;
+
+    public RedisService(IDistributedCache cache, ILogger<RedisService> logger)
+    {
+        _cache = cache;
+        _logger = logger;
+    }
 
     public async Task<T?> GetAsync<T>(string key)
     {
         try
         {
-            var cachedData = await _cache.GetStringAsync(key);
-            if (string.IsNullOrWhiteSpace(cachedData))
+            var cachedBytes = await _cache.GetAsync(key);
+            if (cachedBytes is null || cachedBytes.Length == 0)
                 return default;
 
-            return JsonSerializer.Deserialize<T>(cachedData);
+            var json = Encoding.UTF8.GetString(cachedBytes);
+            return JsonSerializer.Deserialize<T>(json);
         }
         catch (Exception ex)
         {
@@ -32,13 +39,15 @@ public class RedisService(IDistributedCache cache, ILogger<RedisService> logger)
     {
         try
         {
-            var serializedData = JsonSerializer.Serialize(data);
+            var json = JsonSerializer.Serialize(data);
+            var bytes = Encoding.UTF8.GetBytes(json);
+
             var options = new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow ?? TimeSpan.FromMinutes(10)
             };
 
-            await _cache.SetStringAsync(key, serializedData, options);
+            await _cache.SetAsync(key, bytes, options);
         }
         catch (Exception ex)
         {
