@@ -1,5 +1,9 @@
 name: CI/CD - Currency Converter - Unit Tests + Docker Build
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   push:
     branches: [ main, ci-cd ]
