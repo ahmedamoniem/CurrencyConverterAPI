@@ -21,10 +21,10 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: 🧱 Restore dependencies
-        run: dotnet restore BambooCard.CurrencyConverter.sln
+        run: dotnet restore CurrencyConverter.sln
 
       - name: 🛠️ Build solution
-        run: dotnet build BambooCard.CurrencyConverter.sln --no-restore --configuration Release
+        run: dotnet build CurrencyConverter.sln --no-restore --configuration Release
 
       - name: 🧪 Run unit tests only
         run: |
