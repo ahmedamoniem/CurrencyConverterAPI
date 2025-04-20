@@ -12,7 +12,7 @@ using System.Text;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Builder;
 
-namespace CurrencyConverter.Tests.Helpers;
+namespace CurrencyConverter.Test.Helpers;
 
 public class TestStartup
 {
