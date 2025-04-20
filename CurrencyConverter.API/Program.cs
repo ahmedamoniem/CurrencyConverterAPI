@@ -6,6 +6,8 @@ using CurrencyConverter.Application.Interfaces;
 using Serilog;
 using Serilog.Events;
 using CurrencyConverter.Api.Middlewares;
+using CurrencyConverter.Application.Factories;
+using CurrencyConverter.Infrastructure.Providers;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +24,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
 });
 
 builder.Services.AddSingleton<ICacheService, RedisService>();
+builder.Services.AddScoped<ICurrencyProvider, FrankfurterProvider>();
+builder.Services.AddScoped<CurrencyProviderFactory>();
 builder.Host.UseSerilog((ctx, services, loggerConfig) =>
 {
     loggerConfig

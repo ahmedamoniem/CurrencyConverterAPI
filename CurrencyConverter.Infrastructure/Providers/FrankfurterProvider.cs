@@ -16,6 +16,8 @@ public class FrankfurterProvider(
     private readonly ILogger<FrankfurterProvider> _logger = logger;
     private readonly ICacheService _cache = cacheService;
 
+    public string Name => "frankfurter";
+
     public async Task<ExchangeRateDto> GetRatesAsync(string baseCurrency)
     {
         baseCurrency.Throw("Base currency is required.").IfNullOrWhiteSpace(_ => _);
