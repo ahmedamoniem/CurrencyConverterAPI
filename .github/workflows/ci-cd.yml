@@ -1,0 +1,54 @@
+name: CI/CD - Currency Converter - Unit Tests + Docker Build
+
+on:
+  push:
+    branches: [ main, ci-cd ]
+  pull_request:
+    branches: [ main, ci-cd ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    name: Build, Unit Test & Docker Push
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔧 Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: 🧱 Restore dependencies
+        run: dotnet restore BambooCard.CurrencyConverter.sln
+
+      - name: 🛠️ Build solution
+        run: dotnet build BambooCard.CurrencyConverter.sln --no-restore --configuration Release
+
+      - name: 🧪 Run unit tests only
+        run: |
+          dotnet test CurrencyConverter.Tests \
+            --filter "FullyQualifiedName!~IntegrationTests" \
+            --no-build \
+            --configuration Release \
+            --logger trx \
+            --results-directory ./test-results
+
+      - name: 📤 Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: unit-test-results
+          path: ./test-results
+
+      - name: 🐳 Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📦 Build and push Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/currencyconverter-api:latest -f CurrencyConverter.Api/Dockerfile .
+          docker push ghcr.io/${{ github.repository }}/currencyconverter-api:latest
