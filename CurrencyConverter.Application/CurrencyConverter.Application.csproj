@@ -10,4 +10,8 @@
     <PackageReference Include="Throw" Version="1.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CurrencyConverter.Domain\CurrencyConverter.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
