@@ -20,9 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 
-builder.Services
-    .AddFastEndpoints()
-    .SwaggerDocument();
+builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument(o =>
 {
     o.MaxEndpointVersion = 1;
