@@ -28,7 +28,7 @@ public class GetHistoricalRatesEndpointTests : IClassFixture<WebApplicationFacto
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var query = "?BaseCurrency=USD&StartDate=2024-03-01&EndDate=2024-03-05";
-        var response = await _client.GetAsync("/api/rates/historical" + query);
+        var response = await _client.GetAsync("/api/rates/historical/v1" + query);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

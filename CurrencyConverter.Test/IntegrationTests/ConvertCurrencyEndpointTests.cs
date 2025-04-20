@@ -24,7 +24,7 @@ public class ConvertCurrencyEndpointTests(WebApplicationFactory<Program> factory
         var request = new ConversionRequestDto("USD", "EUR", 100);
         var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-        var response = await _client.PostAsync("/api/v1/rates/convert", content);
+        var response = await _client.PostAsync("/api/rates/convert/v1", content);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
