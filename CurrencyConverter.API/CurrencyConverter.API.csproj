@@ -12,19 +12,18 @@
     <PackageReference Include="FastEndpoints" Version="6.0.0" />
     <PackageReference Include="FastEndpoints.Swagger" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.2" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
+    <PackageReference Include="Throw" Version="1.4.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CurrencyConverter.Infrastructure\CurrencyConverter.Infrastructure.csproj" />
     <ProjectReference Include="..\CurrencyConverter.ServiceDefaults\CurrencyConverter.ServiceDefaults.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Middlewares\" />
   </ItemGroup>
 
 </Project>
