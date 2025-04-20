@@ -1,4 +1,4 @@
-using FastEndpoints;
+﻿using FastEndpoints;
 using FastEndpoints.Swagger;
 using CurrencyConverter.Infrastructure.Configuration;
 using CurrencyConverter.Infrastructure.Caching;
@@ -20,9 +20,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 
-builder.Services.AddFastEndpoints();
-builder.Services.SwaggerDocument();
+builder.Services
+    .AddFastEndpoints()
+    .SwaggerDocument();
+builder.Services.SwaggerDocument(o =>
+{
+    o.MaxEndpointVersion = 1;
+    o.DocumentSettings = s =>
+    {
+        s.DocumentName = "Release 1";
+        s.Title = "Currency Converter";
+        s.Version = "v1";
+    };
+});
+
 builder.Services.AddHttpClientPolicies(builder.Configuration);
+
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
@@ -35,6 +48,7 @@ builder.Services.AddSingleton(_ =>
     new JwtTokenValidator(builder.Configuration["Jwt:Issuer"]!,
                           builder.Configuration["Jwt:Audience"]!,
                           builder.Configuration["Jwt:SecretKey"]!));
+
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -82,11 +96,15 @@ app.UseMiddleware<RateLimitingMiddleware>();
 app.UseMiddleware<JwtTokenValidationMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseFastEndpoints();
+app.UseSwaggerGen();
+app.UseFastEndpoints(c =>
+{
+    c.Versioning.Prefix = "v";
+});
 
 app.Run();
 
 public partial class Program
 {
     // This class is used for testing purposes.
-}   
+}

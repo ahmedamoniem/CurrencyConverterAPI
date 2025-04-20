@@ -14,7 +14,7 @@ public class GetLatestRatesEndpoint(ICurrencyService currencyService) : Endpoint
     public override void Configure()
     {
         Verbs(Http.GET);
-        Routes("/api/v{version:apiVersion}/rates/latest");
+        Routes("/api/rates/latest");
         Version(1);
     }
 
