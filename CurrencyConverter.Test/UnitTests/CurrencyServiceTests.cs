@@ -60,8 +60,8 @@ public class CurrencyServiceTests
             p.GetHistoricalRatesAsync("USD", It.IsAny<DateTime>(), It.IsAny<DateTime>()))
             .ReturnsAsync(dto);
 
-        var request = new HistoricalRatesRequestDto("USD", "EUR", today.AddDays(-5), today);
-        var result = await _service.GetHistoricalRatesAsync(request, 1, 2);
+        var request = new HistoricalRatesRequestDto("USD", "EUR", today.AddDays(-5), today, 1, 2);
+        var result = await _service.GetHistoricalRatesAsync(request);
 
         Assert.Equal(2, result.Items.Count());
         Assert.Equal(3, result.TotalCount);
