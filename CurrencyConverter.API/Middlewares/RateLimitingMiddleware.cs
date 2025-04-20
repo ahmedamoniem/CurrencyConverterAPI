@@ -20,8 +20,8 @@ public class RateLimitingMiddleware(RequestDelegate next, IDistributedCache cach
         var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var key = $"ratelimit:{ip}";
 
-        var cached = await _cache.GetStringAsync(key);
-        var count = string.IsNullOrEmpty(cached) ? 0 : int.Parse(cached);
+        var bytes = await _cache.GetAsync(key);
+        var count = bytes is null ? 0 : int.Parse(Encoding.UTF8.GetString(bytes));
 
         if (count >= Limit)
         {
@@ -37,7 +37,8 @@ public class RateLimitingMiddleware(RequestDelegate next, IDistributedCache cach
             AbsoluteExpirationRelativeToNow = Period
         };
 
-        await _cache.SetStringAsync(key, count.ToString(), options);
+        var value = Encoding.UTF8.GetBytes(count.ToString());
+        await _cache.SetAsync(key, value, options);
 
         await _next(context);
     }
