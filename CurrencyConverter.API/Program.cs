@@ -45,6 +45,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
+app.UseMiddleware<RateLimitingMiddleware>();
 app.UseMiddleware<JwtTokenValidationMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
