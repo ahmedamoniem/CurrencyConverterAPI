@@ -1,4 +1,4 @@
-using FastEndpoints;
+﻿using FastEndpoints;
 using FastEndpoints.Swagger;
 using CurrencyConverter.Infrastructure.Configuration;
 using CurrencyConverter.Infrastructure.Caching;
@@ -9,6 +9,10 @@ using CurrencyConverter.Api.Middlewares;
 using CurrencyConverter.Application.Factories;
 using CurrencyConverter.Infrastructure.Providers;
 using CurrencyConverter.Api.Middleware;
+using CurrencyConverter.Application.Services;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using CurrencyConverter.Infrastructure.Security;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,8 +21,19 @@ builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 
 builder.Services.AddFastEndpoints();
-builder.Services.SwaggerDocument();
+builder.Services.SwaggerDocument(o =>
+{
+    o.MaxEndpointVersion = 1;
+    o.DocumentSettings = s =>
+    {
+        s.DocumentName = "Release 1";
+        s.Title = "Currency Converter";
+        s.Version = "v1";
+    };
+});
+
 builder.Services.AddHttpClientPolicies(builder.Configuration);
+
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
@@ -26,6 +41,29 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 builder.Services.AddSingleton<ICacheService, RedisService>();
 builder.Services.AddScoped<ICurrencyProvider, FrankfurterProvider>();
+builder.Services.AddScoped<ICurrencyService, CurrencyService>();
+builder.Services.AddSingleton(_ =>
+    new JwtTokenValidator(builder.Configuration["Jwt:Issuer"]!,
+                          builder.Configuration["Jwt:Audience"]!,
+                          builder.Configuration["Jwt:SecretKey"]!));
+
+
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!))
+        };
+    });
+builder.Services.AddAuthorization();
 builder.Services.AddScoped<CurrencyProviderFactory>();
 builder.Host.UseSerilog((ctx, services, loggerConfig) =>
 {
@@ -56,6 +94,15 @@ app.UseMiddleware<RateLimitingMiddleware>();
 app.UseMiddleware<JwtTokenValidationMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseFastEndpoints();
+app.UseSwaggerGen();
+app.UseFastEndpoints(c =>
+{
+    c.Versioning.Prefix = "v";
+});
 
 app.Run();
+
+public partial class Program
+{
+    // This class is used for testing purposes.
+}

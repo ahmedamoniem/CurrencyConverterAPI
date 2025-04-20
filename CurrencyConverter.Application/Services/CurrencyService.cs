@@ -43,7 +43,7 @@ public class CurrencyService(CurrencyProviderFactory providerFactory) : ICurrenc
     }
 
     public async Task<PaginatedResult<ExchangeRateDto>> GetHistoricalRatesAsync(
-        HistoricalRatesRequestDto request, int page = 1, int pageSize = 50)
+        HistoricalRatesRequestDto request)
     {
         ValidateCurrency(request.BaseCurrency);
         ValidateCurrency(request.TargetCurrency);
@@ -57,18 +57,18 @@ public class CurrencyService(CurrencyProviderFactory providerFactory) : ICurrenc
             .ToList();
 
         var paged = all
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
             .Select(entry => new ExchangeRateDto(
                 request.BaseCurrency,
                 entry.Key,
                 new Dictionary<string, decimal> { [request.TargetCurrency] = entry.Value[request.TargetCurrency] }
             ));
 
-        return new PaginatedResult<ExchangeRateDto>(paged, page, pageSize, all.Count);
+        return new PaginatedResult<ExchangeRateDto>(paged, request.Page, request.PageSize, all.Count);
     }
 
-    private void ValidateCurrency(string currencyCode)
+    private static void ValidateCurrency(string currencyCode)
     {
         if (Enum.TryParse<UnsupportedCurrencies>(currencyCode, true, out _))
             throw new NotSupportedException($"Currency '{currencyCode}' is not supported.");
