@@ -20,7 +20,7 @@ This solution follows a clean multi-project structure:
 
 ## ⚙️ Features
 
--  FastEndpoints-based REST API
+-  [FastEndpoints-based](https://fast-endpoints.com/docs/get-started#create-project-install-package) REST API
 -  JWT authentication with role-based access (RBAC)
 -  Redis distributed caching
 -  Serilog logging (Seq-compatible)
@@ -61,6 +61,7 @@ dotnet test CurrencyConverter.Tests --filter "FullyQualifiedName!~IntegrationTes
 | `/api/rates/historical/v1`     | GET    | Get historical rates for a range   |
 | `/api/rates/convert/v1`        | POST   | Convert amount between currencies  |
 
+| Note: [Resource-based API versioning](https://fast-endpoints.com/docs/api-versioning#release-group-strategy) is used, which makes the version on the end of the URI, not like API versioning which will be befor the API main root.
 ---
 
 ## 📦 Build Docker Image (manually)
