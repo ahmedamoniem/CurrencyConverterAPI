@@ -2,7 +2,7 @@
 
 [![CI/CD - Unit Tests & Docker Build](https://github.com/ahmedamoniem/CurrencyConverterAPI/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/ahmedamoniem/CurrencyConverterAPI/actions/workflows/ci-cd.yml)
 
-A distributed, JWT-secured .NET 8 Web API for real-time and historical currency exchange conversion using [FastEndpoints](https://fast-endpoints.com/), Redis caching, and Serilog logging to Seq.
+A distributed, JWT-secured .NET 9 Web API for real-time and historical currency exchange conversion using [FastEndpoints](https://fast-endpoints.com/), Redis caching, and Serilog logging to Seq.
 
 ---
 
