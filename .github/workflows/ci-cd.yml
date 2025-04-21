@@ -33,7 +33,6 @@ jobs:
       - name: 🧪 Run unit tests only
         run: |
           dotnet test CurrencyConverter.Test \
-            --filter "FullyQualifiedName!~IntegrationTests" \
             --no-build \
             --configuration Release \
             --logger trx \

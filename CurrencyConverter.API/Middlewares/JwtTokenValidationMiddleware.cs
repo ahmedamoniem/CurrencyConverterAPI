@@ -3,18 +3,11 @@ using Serilog;
 
 namespace CurrencyConverter.Api.Middlewares;
 
-public class JwtTokenValidationMiddleware
+public class JwtTokenValidationMiddleware(RequestDelegate next, JwtTokenValidator tokenValidator)
 {
-    private readonly RequestDelegate _next;
-    private readonly JwtTokenValidator _tokenValidator;
-    private readonly Serilog.ILogger _logger;
-
-    public JwtTokenValidationMiddleware(RequestDelegate next, JwtTokenValidator tokenValidator)
-    {
-        _next = next;
-        _tokenValidator = tokenValidator;
-        _logger = Log.ForContext<JwtTokenValidationMiddleware>();
-    }
+    private readonly RequestDelegate _next = next;
+    private readonly JwtTokenValidator _tokenValidator = tokenValidator;
+    private readonly Serilog.ILogger _logger = Log.ForContext<JwtTokenValidationMiddleware>();
 
     public async Task InvokeAsync(HttpContext context)
     {

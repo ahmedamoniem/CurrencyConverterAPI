@@ -52,7 +52,7 @@ public class CurrencyService(CurrencyProviderFactory providerFactory) : ICurrenc
         var history = await provider.GetHistoricalRatesAsync(request.BaseCurrency, request.StartDate, request.EndDate);
 
         var all = history.HistoricalRates!
-            .Where(x => x.Value.ContainsKey(request.TargetCurrency))
+            .Where(x => request.TargetCurrency == null ||  x.Value.ContainsKey(request.TargetCurrency))
             .OrderByDescending(x => x.Key)
             .ToList();
 
@@ -62,7 +62,7 @@ public class CurrencyService(CurrencyProviderFactory providerFactory) : ICurrenc
             .Select(entry => new ExchangeRateDto(
                 request.BaseCurrency,
                 entry.Key,
-                new Dictionary<string, decimal> { [request.TargetCurrency] = entry.Value[request.TargetCurrency] }
+                new Dictionary<string, decimal> { [request.TargetCurrency ?? ""] = entry.Value.TryGetValue(request.TargetCurrency ?? "", out var rate) ? rate : 0 }
             ));
 
         return new PaginatedResult<ExchangeRateDto>(paged, request.Page, request.PageSize, all.Count);
