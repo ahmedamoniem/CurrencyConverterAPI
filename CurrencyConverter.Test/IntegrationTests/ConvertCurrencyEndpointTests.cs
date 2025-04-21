@@ -1,13 +1,10 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
-using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using CurrencyConverter.Application.DTOs;
 using CurrencyConverter.Test.Helpers;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.IdentityModel.Tokens;
 
 namespace CurrencyConverter.Test.IntegrationTests;
 

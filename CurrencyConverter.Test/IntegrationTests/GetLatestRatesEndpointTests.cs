@@ -36,7 +36,7 @@ public class GetLatestRatesEndpointTests(WebApplicationFactory<Program> factory)
     [Fact]
     public async Task ReturnsUnauthorized_WhenTokenMissing()
     {
-        var response = await _client.GetAsync("/api/v1/rates/latest?BaseCurrency=USD");
+        var response = await _client.GetAsync("/api/rates/latest/v1?BaseCurrency=USD");
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }
