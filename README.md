@@ -91,6 +91,7 @@ docker build -t currencyconverter-api -f CurrencyConverter.Api/Dockerfile .
 - 🔄 Add fallback provider strategies for exchange rate APIs.
 - 🔍 Introduce currency validation logic against ISO standards.
 - 📦 Automate versioned Docker image builds using Git tags.
+- 🧘‍♂️ Improve system resilience to allow graceful fallback and continued operation when external dependencies like Redis or third-party APIs are unavailable, avoiding raised exceptions.
 
 ---
 
